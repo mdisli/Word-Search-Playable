@@ -50,14 +50,19 @@ const gridX = 7;
 const gridY = 12;
 let gridslist = [];
 
+let charTextsList = [];
+
 // Input 
 let hoveringGrid;
 let isMouseClicked = false;
 let hoveredGrids = [];
 
 
-var whiteTint = 0xFFFFFF;
-var greenColor = 0x00FF00;
+const whiteColor = 0xFFFFFF;
+const greenColor = 0x00FF00;
+const redColor = 0xFF0000;
+const yellowColor = 0xFFFF00;
+
 //#endregion
 
 export default class Game extends Phaser.Scene {
@@ -81,7 +86,7 @@ export default class Game extends Phaser.Scene {
         debugGraphics = this.add.graphics()
 
         this.createBackground();
-        this.createHand();
+        //this.createHand();
         this.createWordPanel();
         this.createWordList();
         this.createHeader();
@@ -107,9 +112,9 @@ export default class Game extends Phaser.Scene {
         console.log('Pointer down')
         //hoveredGrids.clear();
         //hoveredGrids.push(hoveringGrid);
-        if(hoveringGrid != null && hoveringGrid !=undefined)
+        if (hoveringGrid != null && hoveringGrid != undefined)
             this.onGridSelected(hoveringGrid);
-        
+
         isMouseClicked = true;
 
     }
@@ -193,12 +198,19 @@ export default class Game extends Phaser.Scene {
 
         for (let index = 0; index < wordsListLength; index++) {
 
+            var word = wordsList[index];
             var image = this.add.image(startX, startY + (incrementY * index), 'green_rectangle');
-            this.add.text(startX, startY + (incrementY * index), wordsList[index], {
+            this.add.text(startX, startY + (incrementY * index), word, {
                 fontSize: 45,
                 color: '#000000',
                 align: 'center'
-            }).setDepth(2).setOrigin(0.5, 0.5);
+            })
+            .setDepth(2)
+            .setOrigin(0.5, 0.5)
+
+            image
+            .setDataEnabled(true)
+            .setData('word', word);
             wordPanelWordImageList.push(image);
 
             image.setAlpha(0);
@@ -224,11 +236,16 @@ export default class Game extends Phaser.Scene {
                 gridslist.push(grid);
 
 
-                this.add.text(337 + (index2 * 109), 436 + (index * 109), letter, {
-                    fontSize: 45,
-                    color: '#000000',
-                    align: 'center'
-                }).setDepth(5).setOrigin(0.5, 0.5);
+                var text = this.add.text(337 + (index2 * 109), 436 + (index * 109), letter, {
+                        fontSize: 45,
+                        color: '#000000',
+                        align: 'center'
+                    }).setDepth(5)
+                    .setOrigin(0.5, 0.5)
+                    .setDataEnabled(true)
+                    .setData('id', id);
+
+                charTextsList.push(text);
 
                 id++;
             }
@@ -272,9 +289,10 @@ export default class Game extends Phaser.Scene {
     //#region Selecting Grids
 
     onGridSelected(grid) {
-    
+
         hoveredGrids.push(grid);
         grid.setDepth(2);
+        grid.setTint(yellowColor);
         this.selectGridTween(grid);
     }
 
@@ -283,7 +301,7 @@ export default class Game extends Phaser.Scene {
         this.unmatchedGridTween(grid);
     }
 
-    checkWord() {
+    async checkWord() {
 
         var letters = '';
         for (let index = 0; index < hoveredGrids.length; index++) {
@@ -296,11 +314,17 @@ export default class Game extends Phaser.Scene {
         if (wordsList.includes(letters)) {
             console.log('Matched');
 
-            hoveredGrids.forEach(element => {
-                this.removeGridTween(element, 0);
-            });
+            for (let index = 0; index < hoveredGrids.length; index++) {
+                const element = hoveredGrids[index];
+                this.removeGridTween(element, index * 50);
+            }
 
-            var img = wordPanelWordImageList.indexOf(letters);
+            for (let index = 0; index < wordPanelWordImageList.length; index++) {
+                const element = wordPanelWordImageList[index];
+                console.log(element.getData('word'));
+            }
+            var img = wordPanelWordImageList.find(x => x.getData('word') == letters);
+            console.log(img);
             this.openGreenRectangleTween(img);
 
         } else {
@@ -318,7 +342,7 @@ export default class Game extends Phaser.Scene {
 
     openGreenRectangleTween(index) {
         return this.tweens.add({
-            targets: wordPanelWordImageList[index],
+            targets: index,
             alpha: 1,
             duration: 200,
             ease: 'Linear'
@@ -326,18 +350,28 @@ export default class Game extends Phaser.Scene {
     }
 
     selectGridTween(grid) {
-        //this.colorChangeTween(whiteTint, greenColor, 200, grid);
+        
         return this.tweens.add({
             targets: grid,
-            scaleX: 1.1,
-            scaleY: 1.1,
+            scaleX: 1.02,
+            scaleY: 1.02,
             //tint : greenColor,
             duration: 100,
             ease: 'Linear'
         });
     }
 
-    unmatchedGridTween(grid) {
+    async unmatchedGridTween(grid) {
+
+        grid.setTint(redColor);
+        await this.sleep(150);
+        grid.setTint(whiteColor);
+
+        await this.sleep(150);
+        grid.setTint(redColor);
+        await this.sleep(150);
+        grid.setTint(whiteColor);
+        
         return this.tweens.add({
             targets: grid,
             scaleX: 1,
@@ -347,36 +381,37 @@ export default class Game extends Phaser.Scene {
             ease: 'Linear'
         });
     }
+    async removeGridTween(grid, delay) {
 
-    colorChangeTween(from, to, duration, grid) {
-        return this.tweens.addCounter({
-            from: 0,
-            to: 100,
-            duration: duration,
-            ease: Phaser.Math.Easing.Sine.InOut,
-            onUpdate: tween => {
-                const value = tween.getValue();
-                const colorObject = Phaser.Display.Color.Interpolate.ColorWithColor(from, to, 100, value);
-                const color = Phaser.Display.Color.GetColor(colorObject.r, colorObject.g, colorObject.b);
-                grid.setTint(color);
-            }
+        grid.setTint(greenColor);
+        await this.sleep(150);
+
+        var gridId = grid.getData('id');
+        const txt = charTextsList.find(x => x.getData('id') == gridId);
+        this.tweens.add({
+            targets: txt,
+            alpha: 0,
+            scaleX: 0,
+            scaleY: 0,
+            duration: 350,
+            ease: 'Linear'
         });
-    }
-
-    removeGridTween(grid, delay) {
-
         return this.tweens.add({
             targets: grid,
             scaleX: 0,
             scaleY: 0,
             alpha: 0,
-            duration: 100,
+            duration: 350,
             ease: 'Linear',
-            delay: delay
+            delay: delay,
         });
 
 
     }
     //#endregion
+
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
 }
