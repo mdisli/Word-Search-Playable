@@ -23,10 +23,8 @@ let wordPanelImage;
 let boardImg;
 let headerImage;
 
+// Words
 let wordPanelWordImageList = [];
-
-// Debug
-let debugGraphics;
 
 const headerText = "Can you clear the board?"
 const wordsList = ['PLANE', 'ACADEMY', 'CABIN', 'APPLE', 'DAMAGE', 'DOOR', 'LADY', 'DOCTOR', 'CAN', 'ACE', 'FOX', 'ARM', 'CAMPUS', 'BOX', 'BUTTON', 'LAUGH', 'HORSE', 'IRONY']
@@ -44,13 +42,13 @@ const charLists = [
     ['M', 'G', 'N', 'S', 'O', 'G', 'U'],
     ['Y', 'H', 'Y', 'E', 'N', 'E', 'S'],
 ];
+let charTextsList = [];
 const wordsListLength = wordsList.length;
 
+// Grid
 const gridX = 7;
 const gridY = 12;
 let gridslist = [];
-
-let charTextsList = [];
 
 // Input 
 let hoveringGrid;
@@ -58,6 +56,7 @@ let isMouseClicked = false;
 let hoveredGrids = [];
 
 
+// Colors
 const whiteColor = 0xFFFFFF;
 const greenColor = 0x00FF00;
 const redColor = 0xFF0000;
@@ -66,6 +65,7 @@ const yellowColor = 0xFFFF00;
 //#endregion
 
 export default class Game extends Phaser.Scene {
+    //#region Base Functions
     constructor() {
         super('game');
     }
@@ -82,8 +82,6 @@ export default class Game extends Phaser.Scene {
         this.load.image('single_grid', single_grid);
     }
     create() {
-
-        debugGraphics = this.add.graphics()
 
         this.createBackground();
         //this.createHand();
@@ -105,6 +103,8 @@ export default class Game extends Phaser.Scene {
 
     }
     update() {}
+
+    //#endregion
 
     //#region Input Funcs
 
@@ -201,16 +201,16 @@ export default class Game extends Phaser.Scene {
             var word = wordsList[index];
             var image = this.add.image(startX, startY + (incrementY * index), 'green_rectangle');
             this.add.text(startX, startY + (incrementY * index), word, {
-                fontSize: 45,
-                color: '#000000',
-                align: 'center'
-            })
-            .setDepth(2)
-            .setOrigin(0.5, 0.5)
+                    fontSize: 45,
+                    color: '#000000',
+                    align: 'center'
+                })
+                .setDepth(2)
+                .setOrigin(0.5, 0.5)
 
             image
-            .setDataEnabled(true)
-            .setData('word', word);
+                .setDataEnabled(true)
+                .setData('word', word);
             wordPanelWordImageList.push(image);
 
             image.setAlpha(0);
@@ -300,6 +300,10 @@ export default class Game extends Phaser.Scene {
         grid.setDepth(2);
         this.unmatchedGridTween(grid);
     }
+    //#endregion
+
+    //#region Checking
+
 
     async checkWord() {
 
@@ -314,8 +318,15 @@ export default class Game extends Phaser.Scene {
         if (wordsList.includes(letters)) {
             console.log('Matched');
 
+            var averageX = 0;
+            var averageY = 0;
+            var count = 0;
+    
             for (let index = 0; index < hoveredGrids.length; index++) {
                 const element = hoveredGrids[index];
+                averageX += element.x;
+                averageY += element.y;
+                count++;
                 this.removeGridTween(element, index * 50);
             }
 
@@ -327,6 +338,12 @@ export default class Game extends Phaser.Scene {
             console.log(img);
             this.openGreenRectangleTween(img);
 
+            // Floating Text
+            await this.sleep(200);
+            averageX /= count;
+            averageY /= count;
+            this.createFloatingText(averageX,averageY, letters);
+
         } else {
             console.log('Not Matched');
             hoveredGrids.forEach(element => {
@@ -336,6 +353,7 @@ export default class Game extends Phaser.Scene {
 
         hoveredGrids = [];
     }
+
     //#endregion
 
     //#region Tweens
@@ -350,7 +368,7 @@ export default class Game extends Phaser.Scene {
     }
 
     selectGridTween(grid) {
-        
+
         return this.tweens.add({
             targets: grid,
             scaleX: 1.02,
@@ -371,7 +389,7 @@ export default class Game extends Phaser.Scene {
         grid.setTint(redColor);
         await this.sleep(150);
         grid.setTint(whiteColor);
-        
+
         return this.tweens.add({
             targets: grid,
             scaleX: 1,
@@ -410,6 +428,27 @@ export default class Game extends Phaser.Scene {
     }
     //#endregion
 
+    //#region Floating Text
+
+    createFloatingText(x, y, text) {
+
+        var text = this.add.text(x, y, text, {
+            fontSize: 45,
+            color: '#000000',
+            align: 'center'
+        }).setDepth(5).setOrigin(0.5, 0.5);
+
+        this.tweens.add({
+            targets: text,
+            y: y - 100,
+            alpha: 0,
+            duration: 1000,
+            ease: 'Linear'
+        });
+
+    }
+
+    //#endregion
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
