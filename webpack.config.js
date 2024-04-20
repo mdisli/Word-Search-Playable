@@ -10,7 +10,15 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(png|jpg|gif)$/i,
+        test: /\.(png|jpg)$/i,
+        use: [
+          {
+            loader: 'url-loader',
+          },
+        ],
+      },
+      {
+        test: /\.mp3$/,
         use: [
           {
             loader: 'url-loader',
@@ -31,5 +39,4 @@ module.exports = {
     compress: true,
     port: 9000,
   }
-  
 };

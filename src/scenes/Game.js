@@ -13,6 +13,10 @@ import {
     randInt
 } from 'three/src/math/MathUtils'
 
+
+
+
+
 //#endregion
 
 //#region Variables
@@ -56,11 +60,17 @@ let isMouseClicked = false;
 let hoveredGrids = [];
 
 
-// Colors
-const whiteColor = 0xFFFFFF;
-const greenColor = 0x00FF00;
-const redColor = 0xFF0000;
-const yellowColor = 0xFFFF00;
+// Colors & Tints
+
+const greenColor = '#00FF00';
+const redColor = '#FF0000';
+const yellowColor = '#FFFF00';
+const whiteColor = '#FFFFFF';
+
+const whiteTint = 0xFFFFFF;
+const greenTint = 0x00FF00;
+const redTint = 0xFF0000;
+const yellowTint = 0xFFFF00;
 
 //#endregion
 
@@ -80,6 +90,8 @@ export default class Game extends Phaser.Scene {
         this.load.image('words_panel', words_panel);
         this.load.image('reference', reference);
         this.load.image('single_grid', single_grid);
+        // this.load.audio('success_sound', succes_sound);
+        // this.load.audio('fail_sound', fail_sound);
     }
     create() {
 
@@ -292,7 +304,7 @@ export default class Game extends Phaser.Scene {
 
         hoveredGrids.push(grid);
         grid.setDepth(2);
-        grid.setTint(yellowColor);
+        grid.setTint(yellowTint);
         this.selectGridTween(grid);
     }
 
@@ -318,10 +330,11 @@ export default class Game extends Phaser.Scene {
         if (wordsList.includes(letters)) {
             console.log('Matched');
 
+
             var averageX = 0;
             var averageY = 0;
             var count = 0;
-    
+
             for (let index = 0; index < hoveredGrids.length; index++) {
                 const element = hoveredGrids[index];
                 averageX += element.x;
@@ -342,10 +355,11 @@ export default class Game extends Phaser.Scene {
             await this.sleep(200);
             averageX /= count;
             averageY /= count;
-            this.createFloatingText(averageX,averageY, letters);
+            this.createFloatingText(averageX, averageY, letters);
 
         } else {
             console.log('Not Matched');
+
             hoveredGrids.forEach(element => {
                 this.onGridUnselected(element);
             });
@@ -371,8 +385,8 @@ export default class Game extends Phaser.Scene {
 
         return this.tweens.add({
             targets: grid,
-            scaleX: 1.02,
-            scaleY: 1.02,
+            scaleX: 1,
+            scaleY: 1,
             //tint : greenColor,
             duration: 100,
             ease: 'Linear'
@@ -381,14 +395,14 @@ export default class Game extends Phaser.Scene {
 
     async unmatchedGridTween(grid) {
 
-        grid.setTint(redColor);
+        grid.setTint(redTint);
         await this.sleep(150);
-        grid.setTint(whiteColor);
+        grid.setTint(whiteTint);
 
         await this.sleep(150);
-        grid.setTint(redColor);
+        grid.setTint(redTint);
         await this.sleep(150);
-        grid.setTint(whiteColor);
+        grid.setTint(whiteTint);
 
         return this.tweens.add({
             targets: grid,
@@ -401,7 +415,7 @@ export default class Game extends Phaser.Scene {
     }
     async removeGridTween(grid, delay) {
 
-        grid.setTint(greenColor);
+        grid.setTint(greenTint);
         await this.sleep(150);
 
         var gridId = grid.getData('id');
@@ -434,7 +448,9 @@ export default class Game extends Phaser.Scene {
 
         var text = this.add.text(x, y, text, {
             fontSize: 45,
-            color: '#000000',
+            color: greenColor,
+            stroke: whiteColor,
+            strokeThickness: 10,
             align: 'center'
         }).setDepth(5).setOrigin(0.5, 0.5);
 
