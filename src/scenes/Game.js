@@ -55,7 +55,6 @@ const gridY = 12;
 let gridslist = [];
 
 // Input 
-let hoveringGrid;
 let isMouseClicked = false;
 let hoveredGrids = [];
 
@@ -120,12 +119,16 @@ export default class Game extends Phaser.Scene {
 
     //#region Input Funcs
 
-    handlePointerDown() {
+    handlePointerDown(event,gameObjects) {
         console.log('Pointer down')
-        //hoveredGrids.clear();
-        //hoveredGrids.push(hoveringGrid);
-        if (hoveringGrid != null && hoveringGrid != undefined)
-            this.onGridSelected(hoveringGrid);
+        
+        var grid = gameObjects[0];
+        if (grid instanceof Phaser.GameObjects.Image && grid.getData('letter') && !hoveredGrids.includes(grid)) {
+        
+            this.onGridSelected(grid);
+            //console.log(grid.getData('letter'));
+        }
+
 
         isMouseClicked = true;
 
@@ -136,7 +139,6 @@ export default class Game extends Phaser.Scene {
         // Eğer tıklanan nesne bir grid ise ve harf verisi varsa
         var grid = gameObjects[0];
         if (grid instanceof Phaser.GameObjects.Image && grid.getData('letter') && !hoveredGrids.includes(grid)) {
-            hoveringGrid = grid;
             if (!isMouseClicked) return;
 
             var lastGrid = hoveredGrids[hoveredGrids.length - 1];
