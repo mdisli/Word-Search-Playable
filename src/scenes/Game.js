@@ -9,12 +9,8 @@ import header from '../../assets/header.png' // 1080x325
 import words_panel from '../../assets/words_panel.png' // 250x1314
 import reference from '../../assets/reference.png' // 1080x1920
 import single_grid from '../../assets/single_grid.png' // 111x111
-import {
-    randInt
-} from 'three/src/math/MathUtils'
-
-
-
+import complete_bg from '../../assets/complete_bg_empty.png'; // 1080x1920
+import play_now from '../../assets/play_now_button.png';
 
 
 //#endregion
@@ -24,7 +20,6 @@ import {
 let handImage;
 let backgroundImage;
 let wordPanelImage;
-let boardImg;
 let headerImage;
 
 // Words
@@ -71,6 +66,12 @@ const greenTint = 0x00FF00;
 const redTint = 0xFF0000;
 const yellowTint = 0xFFFF00;
 
+// End Level Screen
+
+let completeBg;
+let playNowButton;
+let playNowTxt;
+
 //#endregion
 
 export default class Game extends Phaser.Scene {
@@ -89,6 +90,8 @@ export default class Game extends Phaser.Scene {
         this.load.image('words_panel', words_panel);
         this.load.image('reference', reference);
         this.load.image('single_grid', single_grid);
+        this.load.image('complete_bg', complete_bg);
+        this.load.image('play_now', play_now);
         // this.load.audio('success_sound', succes_sound);
         // this.load.audio('fail_sound', fail_sound);
     }
@@ -100,6 +103,8 @@ export default class Game extends Phaser.Scene {
         this.createWordList();
         this.createHeader();
         this.createGrids();
+        this.createCompleteBg();
+
 
         // Events
         // click event
@@ -122,14 +127,13 @@ export default class Game extends Phaser.Scene {
     handlePointerDown(event,gameObjects) {
         console.log('Pointer down')
         
-        var grid = gameObjects[0];
-        if (grid instanceof Phaser.GameObjects.Image && grid.getData('letter') && !hoveredGrids.includes(grid)) {
+        var clickedObject = gameObjects[0];
+        if (clickedObject instanceof Phaser.GameObjects.Image && clickedObject.getData('letter') && !hoveredGrids.includes(clickedObject)) {
         
-            this.onGridSelected(grid);
+            this.onGridSelected(clickedObject);
             //console.log(grid.getData('letter'));
         }
-
-
+        
         isMouseClicked = true;
 
     }
@@ -144,7 +148,7 @@ export default class Game extends Phaser.Scene {
             var lastGrid = hoveredGrids[hoveredGrids.length - 1];
             var neighbours = lastGrid.getData('neighbours');
             if (!neighbours.includes(grid)) {
-                console.log('Not neighbour');
+                //console.log('Not neighbour');
                 return;
             }
 
@@ -169,7 +173,7 @@ export default class Game extends Phaser.Scene {
         backgroundImage.setOrigin(0, 0);
         backgroundImage.depth = 0;
 
-        boardImg = this.add.image(540, 1050, 'board_cat').setDepth(0).setOrigin(.5, .5);
+        this.add.image(540, 1050, 'board_cat').setDepth(0).setOrigin(.5, .5);
 
     }
 
@@ -190,6 +194,27 @@ export default class Game extends Phaser.Scene {
         }).setDepth(2).setOrigin(0.5, 0.5);
 
 
+    }
+
+    createCompleteBg() {
+        completeBg = this.add.image(540, 960, 'complete_bg');
+        completeBg.setOrigin(0.5, 0.5);
+        completeBg.depth = -2;
+        completeBg.setAlpha(0);
+
+        playNowButton = this.add.image(540, 1235, 'play_now');
+        playNowButton.setOrigin(0.5, 0.5);
+        playNowButton.setAlpha(1);
+        playNowButton.depth = -2;
+
+        playNowTxt = this.add.text(540, 1235, 'Play Now', {
+            fontSize: 60,
+            color: '#000000',
+            align: 'center'
+        });
+
+        playNowTxt.setOrigin(0.5, 0.5);
+        playNowTxt.depth = -1;
     }
 
     createHand() {
@@ -321,17 +346,17 @@ export default class Game extends Phaser.Scene {
 
     async checkWord() {
 
-        var letters = '';
+        var word = '';
         for (let index = 0; index < hoveredGrids.length; index++) {
             const element = hoveredGrids[index];
 
-            letters += element.getData('letter');
+            word += element.getData('letter');
         }
-        console.log(letters);
+        console.log(word);
 
-        if (wordsList.includes(letters)) {
+        if (wordsList.includes(word)) {
+
             console.log('Matched');
-
 
             var averageX = 0;
             var averageY = 0;
@@ -347,17 +372,19 @@ export default class Game extends Phaser.Scene {
 
             for (let index = 0; index < wordPanelWordImageList.length; index++) {
                 const element = wordPanelWordImageList[index];
-                console.log(element.getData('word'));
+                //console.log(element.getData('word'));
             }
-            var img = wordPanelWordImageList.find(x => x.getData('word') == letters);
-            console.log(img);
+            var img = wordPanelWordImageList.find(x => x.getData('word') == word);
+            //console.log(img);
             this.openGreenRectangleTween(img);
 
             // Floating Text
             await this.sleep(200);
             averageX /= count;
             averageY /= count;
-            this.createFloatingText(averageX, averageY, letters);
+            this.createFloatingText(averageX, averageY, word);
+
+            this.checkForComplete(word);
 
         } else {
             console.log('Not Matched');
@@ -370,9 +397,42 @@ export default class Game extends Phaser.Scene {
         hoveredGrids = [];
     }
 
+    checkForComplete(matchedWord){
+
+        wordsList.splice(wordsList.indexOf(matchedWord),1);
+        console.log(wordsList.length);
+        if(wordsList.length == 0){
+            console.log('Game Completed');
+            this.openCompleteBg();
+        }
+
+
+        
+    }
+
     //#endregion
 
     //#region Tweens
+
+    openCompleteBg() {
+        completeBg.setDepth(10);
+        playNowButton.setDepth(11);
+        playNowTxt.setDepth(12);
+
+        this.tweens.add({
+            targets: completeBg,
+            alpha: 1,
+            duration: 300,
+            ease: 'Linear'
+        });
+
+        playNowButton.setInteractive();
+        playNowButton.setAlpha(1);
+        playNowButton.on('pointerdown', (pointer) => {
+            mraid.open("https://apps.apple.com/us/app/word-search-colorful/id543054341");
+        });
+
+    }
 
     openGreenRectangleTween(index) {
         return this.tweens.add({
