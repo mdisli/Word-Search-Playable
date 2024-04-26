@@ -12,10 +12,16 @@ import single_grid from '../../assets/single_grid.png' // 111x111
 import complete_bg from '../../assets/complete_bg_empty.png'; // 1080x1920
 import play_now from '../../assets/play_now_button.png';
 
+// Localization
+import localization_manager from '../localization/localization_manager';
+import localization_file from '../localization/localization.json';
+import localization_settings from '../localization/localization_settings.json';
 
 //#endregion
 
 //#region Variables
+
+const localizationManager = new localization_manager(localization_settings["language"], localization_file);
 
 let handImage;
 let backgroundImage;
@@ -25,22 +31,10 @@ let headerImage;
 // Words
 let wordPanelWordImageList = [];
 
-const headerText = "Can you clear the board?"
-const wordsList = ['PLANE', 'ACADEMY', 'CABIN', 'APPLE', 'DAMAGE', 'DOOR', 'LADY', 'DOCTOR', 'CAN', 'ACE', 'FOX', 'ARM', 'CAMPUS', 'BOX', 'BUTTON', 'LAUGH', 'HORSE', 'IRONY']
-const charLists = [
-    ['P', 'A', 'C', 'A', 'B', 'I', 'N'],
-    ['L', 'P', 'D', 'L', 'A', 'D', 'Y'],
-    ['A', 'P', 'O', 'A', 'C', 'A', 'N'],
-    ['N', 'L', 'O', 'R', 'A', 'C', 'E'],
-    ['E', 'E', 'R', 'M', 'F', 'O', 'X'],
-    ['A', 'D', 'O', 'C', 'T', 'O', 'R'],
-    ['C', 'B', 'O', 'X', 'B', 'D', 'C'],
-    ['A', 'L', 'I', 'H', 'U', 'A', 'A'],
-    ['D', 'A', 'R', 'O', 'T', 'M', 'M'],
-    ['E', 'U', 'O', 'R', 'T', 'A', 'P'],
-    ['M', 'G', 'N', 'S', 'O', 'G', 'U'],
-    ['Y', 'H', 'Y', 'E', 'N', 'E', 'S'],
-];
+const headerText = localizationManager.getWord('headerTxt');
+const wordsList = localizationManager.getWord('wordList');
+const charLists = localizationManager.getWord('charList');
+
 let charTextsList = [];
 const wordsListLength = wordsList.length;
 
@@ -70,6 +64,9 @@ const yellowTint = 0xFFFF00;
 
 let completeBg;
 let playNowButton;
+const gameNameTxtString = localizationManager.getWord('gameName');
+let gameNameTxt;
+const playNowTxtString = localizationManager.getWord('playTxt');
 let playNowTxt;
 
 //#endregion
@@ -97,6 +94,7 @@ export default class Game extends Phaser.Scene {
     }
     create() {
 
+        //localizationManager = new localization_manager(localization_settings["language"], localization_file);
         this.createBackground();
         //this.createHand();
         this.createWordPanel();
@@ -116,6 +114,7 @@ export default class Game extends Phaser.Scene {
 
         this.input.on('pointerup', this.handlePointerUp, this);
 
+        console.log(localizationManager.getWord('headerTxt'));
 
     }
     update() {}
@@ -207,14 +206,27 @@ export default class Game extends Phaser.Scene {
         playNowButton.setAlpha(1);
         playNowButton.depth = -2;
 
-        playNowTxt = this.add.text(540, 1235, 'Play Now', {
-            fontSize: 60,
-            color: '#000000',
+        playNowTxt = this.add.text(540, 1235, playNowTxtString, {
+            font: 'bold 55px Arial',
+            fill: '#5E5E5E',
             align: 'center'
         });
 
         playNowTxt.setOrigin(0.5, 0.5);
         playNowTxt.depth = -1;
+
+        gameNameTxt = this.add.text(540, 1070, gameNameTxtString, {
+            
+            font: 'bold 65px Arial',
+            fill: '#5E5E5E',
+            align: 'center'
+        });
+
+        gameNameTxt.depth = -1;
+        gameNameTxt.setOrigin(0.5, 0.5);
+
+
+        //this.openCompleteBg();
     }
 
     createHand() {
@@ -418,6 +430,7 @@ export default class Game extends Phaser.Scene {
         completeBg.setDepth(10);
         playNowButton.setDepth(11);
         playNowTxt.setDepth(12);
+        gameNameTxt.setDepth(12);
 
         this.tweens.add({
             targets: completeBg,

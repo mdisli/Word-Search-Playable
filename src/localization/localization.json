@@ -1,0 +1,35 @@
+{
+    "headerTxt" : {
+        "en" : "Can you clear the board"
+    },
+
+    "wordList" : {
+        "en" : ["PLANE", "ACADEMY", "CABIN", "APPLE", "DAMAGE", "DOOR", "LADY", "DOCTOR", "CAN", "ACE", "FOX", "ARM", "CAMPUS", "BOX", "BUTTON", "LAUGH", "HORSE", "IRONY"]
+    },
+
+    "charList" : {
+        "en" : [
+            ["P", "A", "C", "A", "B", "I", "N"],
+            ["L", "P", "D", "L", "A", "D", "Y"],
+            ["A", "P", "O", "A", "C", "A", "N"],
+            ["N", "L", "O", "R", "A", "C", "E"],
+            ["E", "E", "R", "M", "F", "O", "X"],
+            ["A", "D", "O", "C", "T", "O", "R"],
+            ["C", "B", "O", "X", "B", "D", "C"],
+            ["A", "L", "I", "H", "U", "A", "A"],
+            ["D", "A", "R", "O", "T", "M", "M"],
+            ["E", "U", "O", "R", "T", "A", "P"],
+            ["M", "G", "N", "S", "O", "G", "U"],
+            ["Y", "H", "Y", "E", "N", "E", "S"]
+        ]
+        
+    },
+
+    "gameName" : {
+        "en" : "WORD SEARCH\nCOLORFUL"
+    },
+
+    "playTxt" : {
+        "en" : "PLAY NOW"
+    }
+}
