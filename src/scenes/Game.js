@@ -422,7 +422,7 @@ export default class Game extends Phaser.Scene {
         console.log(wordsList.length);
         if (wordsList.length == 0) {
             console.log('Game Completed');
-            this.openCompleteBg();
+            this.openCompleteBg(true);
         }
 
 
