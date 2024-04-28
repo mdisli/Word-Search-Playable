@@ -12,6 +12,17 @@ import single_grid from '../../assets/single_grid.png' // 111x111
 import complete_bg from '../../assets/complete_bg_empty.png'; // 1080x1920
 import play_now from '../../assets/play_now_button.png';
 
+// Particle
+// import blue_particle from '../../assets/particle/blue_particle.png';
+// import green_particle from '../../assets/particle/green_particle.png';
+// import red_particle from '../../assets/particle/red_particle.png';
+// import yellow_particle from '../../assets/particle/yellow_particle.png';
+// import orange_particle from '../../assets/particle/orange_particle.png';
+// import purple_particle from '../../assets/particle/purple_particle.png';
+
+import particle_atlas from '../../assets/particles-0.png';
+import particle_json from '../../assets/particles.json';
+
 // Localization
 import localization_manager from '../localization/localization_manager';
 import localization_file from '../localization/localization.json';
@@ -89,23 +100,17 @@ export default class Game extends Phaser.Scene {
         this.load.image('single_grid', single_grid);
         this.load.image('complete_bg', complete_bg);
         this.load.image('play_now', play_now);
-        // this.load.audio('success_sound', succes_sound);
-        // this.load.audio('fail_sound', fail_sound);
-    }
-    create() {
+        this.load.atlas('confettie', particle_atlas, particle_json);
 
-        //localizationManager = new localization_manager(localization_settings["language"], localization_file);
+    }
+    async create() {        
         this.createBackground();
-        //this.createHand();
         this.createWordPanel();
         this.createWordList();
         this.createHeader();
         this.createGrids();
         this.createCompleteBg();
-
-
         // Events
-        // click event
         this.input.on('pointerdown', this.handlePointerDown, this);
 
         this.input.on('pointermove', this.handlePointerMove, this);
@@ -113,9 +118,6 @@ export default class Game extends Phaser.Scene {
         this.input.on('pointerover', this.handlePointerOver, this);
 
         this.input.on('pointerup', this.handlePointerUp, this);
-
-        console.log(localizationManager.getWord('headerTxt'));
-
     }
     update() {}
 
@@ -123,16 +125,16 @@ export default class Game extends Phaser.Scene {
 
     //#region Input Funcs
 
-    handlePointerDown(event,gameObjects) {
+    handlePointerDown(event, gameObjects) {
         console.log('Pointer down')
-        
+
         var clickedObject = gameObjects[0];
         if (clickedObject instanceof Phaser.GameObjects.Image && clickedObject.getData('letter') && !hoveredGrids.includes(clickedObject)) {
-        
+
             this.onGridSelected(clickedObject);
             //console.log(grid.getData('letter'));
         }
-        
+
         isMouseClicked = true;
 
     }
@@ -216,7 +218,7 @@ export default class Game extends Phaser.Scene {
         playNowTxt.depth = -1;
 
         gameNameTxt = this.add.text(540, 1070, gameNameTxtString, {
-            
+
             font: 'bold 65px Arial',
             fill: '#5E5E5E',
             align: 'center'
@@ -409,24 +411,29 @@ export default class Game extends Phaser.Scene {
         hoveredGrids = [];
     }
 
-    checkForComplete(matchedWord){
+    checkForComplete(matchedWord) {
 
-        wordsList.splice(wordsList.indexOf(matchedWord),1);
+        wordsList.splice(wordsList.indexOf(matchedWord), 1);
         console.log(wordsList.length);
-        if(wordsList.length == 0){
+        if (wordsList.length == 0) {
             console.log('Game Completed');
             this.openCompleteBg();
         }
 
 
-        
+
     }
 
     //#endregion
 
     //#region Tweens
 
-    openCompleteBg() {
+    async openCompleteBg() {
+
+        this.gameCompleteParticleCeremony();
+
+        await this.sleep(2000);
+
         completeBg.setDepth(10);
         playNowButton.setDepth(11);
         playNowTxt.setDepth(12);
@@ -537,6 +544,94 @@ export default class Game extends Phaser.Scene {
             ease: 'Linear'
         });
 
+    }
+
+    //#endregion
+
+    //#region Particle
+
+    gameCompleteParticleCeremony(){
+
+        const particle0 = this.confettieParticle2(560, 960);
+        particle0.explode(50);
+
+        const particle1 = this.confettieParticle2(220, 350);
+        particle1.explode(50);
+
+        const particle2 = this.confettieParticle2(860, 350);
+        particle2.explode(50);
+
+        const particle3 = this.confettieParticle2(220, 1580);
+        particle3.explode(50);
+
+        const particle4 = this.confettieParticle2(860, 1580);
+        particle4.explode(50);
+
+    }
+
+    confettieParticle(x,y,minSpeed, maxSpeed) {
+
+        const particle = this.add.particles(x, y, 'confettie', {
+            frame: ['blue_particle.png', 'green_particle.png', 'orange_particle.png', 'purple_particle.png', 'red_particle.png', 'yellow_particle.png'],
+            lifespan: 4000,
+            angle: {
+                min: 0,
+                max: 360
+            },
+            speedY :{
+                start : -1000,
+                end : 0
+            },
+            speedX: {
+                min: minSpeed,
+                max: maxSpeed
+            },
+            scale: {
+                start: 0.8,
+                end: 0
+            },
+            gravityY: 350,
+            rotate: {
+                start: 0,
+                end: 360,
+                ease: 'Linear'
+            },
+            quantity: 1,
+            frequency: 10,
+            stopAfter: 200,
+            
+            emitZone: {
+                source: new Phaser.Geom.Rectangle(0, 0, 100, 100),
+                
+                yoyo: true,
+                gravityY: 1000,
+                angle: { min: 0, max: 360 },
+                speed: { min: 200, max: 600 },
+                lifespan: 2000,
+                blendMode: 'ADD',
+
+            },
+        });
+
+        particle.setDepth(15);
+
+        return particle;
+    }
+
+    confettieParticle2(x, y) {
+        const emitter = this.add.particles(x, y, 'confettie', {
+            frame: ['blue_particle.png', 'green_particle.png', 'orange_particle.png', 'purple_particle.png', 'red_particle.png', 'yellow_particle.png'],
+            lifespan: 2000,
+            speed: { min: 150, max: 250 },
+            scale: { start: 0.8, end: 0 },
+            gravityY: 150,
+            emitting: false,
+            rotate: { start: 0, end: 360 },
+        });
+
+        emitter.setDepth(15);
+
+        return emitter;
     }
 
     //#endregion
