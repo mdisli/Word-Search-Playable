@@ -12,14 +12,6 @@ import single_grid from '../../assets/single_grid.png' // 111x111
 import complete_bg from '../../assets/complete_bg_empty.png'; // 1080x1920
 import play_now from '../../assets/play_now_button.png';
 
-// Particle
-// import blue_particle from '../../assets/particle/blue_particle.png';
-// import green_particle from '../../assets/particle/green_particle.png';
-// import red_particle from '../../assets/particle/red_particle.png';
-// import yellow_particle from '../../assets/particle/yellow_particle.png';
-// import orange_particle from '../../assets/particle/orange_particle.png';
-// import purple_particle from '../../assets/particle/purple_particle.png';
-
 import particle_atlas from '../../assets/particles-0.png';
 import particle_json from '../../assets/particles.json';
 
@@ -80,6 +72,12 @@ let gameNameTxt;
 const playNowTxtString = localizationManager.getWord('playTxt');
 let playNowTxt;
 
+const maxPlayTime = 60;
+
+// CLicking
+let canClick = true;
+let isGameStarted = false;
+
 //#endregion
 
 export default class Game extends Phaser.Scene {
@@ -103,7 +101,7 @@ export default class Game extends Phaser.Scene {
         this.load.atlas('confettie', particle_atlas, particle_json);
 
     }
-    async create() {        
+    async create() {
         this.createBackground();
         this.createWordPanel();
         this.createWordList();
@@ -126,6 +124,13 @@ export default class Game extends Phaser.Scene {
     //#region Input Funcs
 
     handlePointerDown(event, gameObjects) {
+        if (!canClick) return;
+
+        if (!isGameStarted) {
+            isGameStarted = true;
+            this.countDownTimer();
+        }
+
         console.log('Pointer down')
 
         var clickedObject = gameObjects[0];
@@ -428,11 +433,15 @@ export default class Game extends Phaser.Scene {
 
     //#region Tweens
 
-    async openCompleteBg() {
+    async openCompleteBg(isCompleted) {
 
-        this.gameCompleteParticleCeremony();
+        canClick = false;
 
-        await this.sleep(2000);
+        if (isCompleted) {
+            this.gameCompleteParticleCeremony();
+
+            await this.sleep(2000);
+        }
 
         completeBg.setDepth(10);
         playNowButton.setDepth(11);
@@ -550,7 +559,7 @@ export default class Game extends Phaser.Scene {
 
     //#region Particle
 
-    gameCompleteParticleCeremony(){
+    gameCompleteParticleCeremony() {
 
         const particle0 = this.confettieParticle2(560, 960);
         particle0.explode(50);
@@ -569,7 +578,7 @@ export default class Game extends Phaser.Scene {
 
     }
 
-    confettieParticle(x,y,minSpeed, maxSpeed) {
+    confettieParticle(x, y, minSpeed, maxSpeed) {
 
         const particle = this.add.particles(x, y, 'confettie', {
             frame: ['blue_particle.png', 'green_particle.png', 'orange_particle.png', 'purple_particle.png', 'red_particle.png', 'yellow_particle.png'],
@@ -578,9 +587,9 @@ export default class Game extends Phaser.Scene {
                 min: 0,
                 max: 360
             },
-            speedY :{
-                start : -1000,
-                end : 0
+            speedY: {
+                start: -1000,
+                end: 0
             },
             speedX: {
                 min: minSpeed,
@@ -599,14 +608,20 @@ export default class Game extends Phaser.Scene {
             quantity: 1,
             frequency: 10,
             stopAfter: 200,
-            
+
             emitZone: {
                 source: new Phaser.Geom.Rectangle(0, 0, 100, 100),
-                
+
                 yoyo: true,
                 gravityY: 1000,
-                angle: { min: 0, max: 360 },
-                speed: { min: 200, max: 600 },
+                angle: {
+                    min: 0,
+                    max: 360
+                },
+                speed: {
+                    min: 200,
+                    max: 600
+                },
                 lifespan: 2000,
                 blendMode: 'ADD',
 
@@ -622,11 +637,20 @@ export default class Game extends Phaser.Scene {
         const emitter = this.add.particles(x, y, 'confettie', {
             frame: ['blue_particle.png', 'green_particle.png', 'orange_particle.png', 'purple_particle.png', 'red_particle.png', 'yellow_particle.png'],
             lifespan: 2000,
-            speed: { min: 150, max: 250 },
-            scale: { start: 0.8, end: 0 },
+            speed: {
+                min: 150,
+                max: 250
+            },
+            scale: {
+                start: 0.8,
+                end: 0
+            },
             gravityY: 150,
             emitting: false,
-            rotate: { start: 0, end: 360 },
+            rotate: {
+                start: 0,
+                end: 360
+            },
         });
 
         emitter.setDepth(15);
@@ -635,8 +659,26 @@ export default class Game extends Phaser.Scene {
     }
 
     //#endregion
+
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async countDownTimer() {
+
+
+        console.log('Countdown started');
+        var curTime = 0;
+
+        while (curTime < maxPlayTime) {
+            await this.sleep(1000);
+            curTime++;
+            console.log(curTime);
+        }
+
+        console.log('Time is up');
+        this.openCompleteBg(false);
+
     }
 
 }
