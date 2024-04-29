@@ -1,30 +1,14 @@
 //#region Imports
-
-import hand from '../../assets/hand.png' // 205x216
-import background from '../../assets/background_white.png'
-import board_cat from '../../assets/board-cat.png' // 1080x1408
-import empty_rectange from '../../assets/empty_rectangle.png' // 213x65
-import green_rectangle from '../../assets/green_rectangle.png' // 214x65
-import header from '../../assets/header.png' // 1080x325
-import words_panel from '../../assets/words_panel.png' // 250x1314
-import reference from '../../assets/reference.png' // 1080x1920
-import single_grid from '../../assets/single_grid.png' // 111x111
-import complete_bg from '../../assets/complete_bg_empty.png'; // 1080x1920
-import play_now from '../../assets/play_now_button.png';
-
-import particle_atlas from '../../assets/particles-0.png';
-import particle_json from '../../assets/particles.json';
-
-// Localization
-import localization_manager from '../localization/localization_manager';
-import localization_file from '../localization/localization.json';
-import localization_settings from '../localization/localization_settings.json';
+import Phaser from '../lib/phaser.js';
+import localization_manager from '../localization/localization_manager.js';
+const localization_file_path = 'src/localization/localization.json';
+const localization_settings_path = 'src/localization/localization_settings.json';
 
 //#endregion
 
 //#region Variables
 
-const localizationManager = new localization_manager(localization_settings["language"], localization_file);
+let localizationManager;
 
 let handImage;
 let backgroundImage;
@@ -34,12 +18,12 @@ let headerImage;
 // Words
 let wordPanelWordImageList = [];
 
-const headerText = localizationManager.getWord('headerTxt');
-const wordsList = localizationManager.getWord('wordList');
-const charLists = localizationManager.getWord('charList');
+let headerText;
+let wordsList;
+let charLists;
 
 let charTextsList = [];
-const wordsListLength = wordsList.length;
+let wordsListLength;
 
 // Grid
 const gridX = 7;
@@ -67,9 +51,9 @@ const yellowTint = 0xFFFF00;
 
 let completeBg;
 let playNowButton;
-const gameNameTxtString = localizationManager.getWord('gameName');
+let gameNameTxtString;
 let gameNameTxt;
-const playNowTxtString = localizationManager.getWord('playTxt');
+let playNowTxtString;
 let playNowTxt;
 
 const maxPlayTime = 60;
@@ -77,31 +61,43 @@ const maxPlayTime = 60;
 // CLicking
 let canClick = true;
 let isGameStarted = false;
-
 //#endregion
 
-export default class Game extends Phaser.Scene {
+export default class Game extends window.Phaser.Scene {
     //#region Base Functions
     constructor() {
         super('game');
     }
 
     preload() {
-        this.load.image('hand', hand);
-        this.load.image('background', background);
-        this.load.image('board_cat', board_cat);
-        this.load.image('empty_rectangle', empty_rectange);
-        this.load.image('green_rectangle', green_rectangle);
-        this.load.image('header', header);
-        this.load.image('words_panel', words_panel);
-        this.load.image('reference', reference);
-        this.load.image('single_grid', single_grid);
-        this.load.image('complete_bg', complete_bg);
-        this.load.image('play_now', play_now);
-        this.load.atlas('confettie', particle_atlas, particle_json);
 
+        this.load.image('hand', '../../assets/hand.png');
+        this.load.image('background', '../../assets/background_white.png');
+        this.load.image('board_cat', '../../assets/board-cat.png');
+        this.load.image('empty_rectangle', '../../assets/empty_rectangle.png');
+        this.load.image('green_rectangle', '../../assets/green_rectangle.png');
+        this.load.image('header', '../../assets/header.png');
+        this.load.image('words_panel', '../../assets/words_panel.png');
+        this.load.image('reference', '../../assets/reference.png');
+        this.load.image('single_grid', '../../assets/single_grid.png');
+        this.load.image('complete_bg', '../../assets/complete_bg_empty.png');
+        this.load.image('play_now', '../../assets/play_now_button.png');
+        this.load.atlas('confettie', '../../assets/particles-0.png', '../../assets/particles.json');
     }
     async create() {
+
+
+        var localization_settings = await fetchJSON(localization_settings_path);
+        var localization_file = await fetchJSON(localization_file_path);
+        localizationManager = new localization_manager(localization_settings["language"], localization_file);
+
+        gameNameTxtString = localizationManager.getWord('gameName');
+        playNowTxtString = localizationManager.getWord('playTxt');
+        headerText = localizationManager.getWord('headerTxt');
+        wordsList = localizationManager.getWord('wordList');
+        charLists = localizationManager.getWord('charList');
+        wordsListLength = wordsList.length;
+
         this.createBackground();
         this.createWordPanel();
         this.createWordList();
@@ -681,4 +677,12 @@ export default class Game extends Phaser.Scene {
 
     }
 
+}
+
+async function fetchJSON(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+    }
+    return await response.json();
 }
