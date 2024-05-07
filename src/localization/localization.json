@@ -1,10 +1,13 @@
 {
     "headerTxt" : {
-        "en" : "Can you clear the board"
+        "en" : "Can you clear the board",
+        "pt" : "Você consegue esvazlar o tabuleiro?"
     },
 
     "wordList" : {
-        "en" : ["PLANE", "ACADEMY", "CABIN", "APPLE", "DAMAGE", "DOOR", "LADY", "DOCTOR", "CAN", "ACE", "FOX", "ARM", "CAMPUS", "BOX", "BUTTON", "LAUGH", "HORSE", "IRONY"]
+        "en" : ["PLANE", "ACADEMY", "CABIN", "APPLE", "DAMAGE", "DOOR", "LADY", "DOCTOR", "CAN", "ACE", "FOX", "ARM", "CAMPUS", "BOX", "BUTTON", "LAUGH", "HORSE", "IRONY"],
+        "pt" : ["MASSA", "POLÍCIA", "METRO", "CARRO", "QUEIJO", "MESA", "GATO", "COMIDA", "OLÁ", "UVA", "SOL", "BOM", "MINUTO", "RUA", "AMANHÃ", "BANCO", "VERDE", "RÁDIO"]
+
     },
 
     "charList" : {
@@ -21,15 +24,34 @@
             ["E", "U", "O", "R", "T", "A", "P"],
             ["M", "G", "N", "S", "O", "G", "U"],
             ["Y", "H", "Y", "E", "N", "E", "S"]
+        ],
+
+        "pt": [
+            ["M", "C", "M", "E", "T", "R", "O"],
+            ["A", "A", "M", "G", "A", "T", "O"],
+            ["S", "R", "E", "B", "O", "L", "Á"],
+            ["S", "R", "S", "O", "U", "V", "A"],
+            ["A", "O", "A", "M", "S", "O", "L"],
+            ["P", "C", "O", "M", "I", "D", "A"],
+            ["O", "R", "U", "A", "A", "Q", "M"],
+            ["L", "B", "R", "V", "M", "U", "I"],
+            ["Í", "A", "Á", "E", "A", "E", "N"],
+            ["C", "N", "D", "R", "N", "I", "U"],
+            ["I", "C", "I", "D", "H", "J", "T"],
+            ["A", "O", "O", "E", "Ã", "O", "O"]
         ]
+
+
         
     },
 
     "gameName" : {
-        "en" : "WORD SEARCH\nCOLORFUL"
+        "en" : "WORD SEARCH\nCOLORFUL",
+        "pt" : "CAÇA\nPALAVRAS"
     },
 
     "playTxt" : {
-        "en" : "PLAY NOW"
+        "en" : "PLAY NOW",
+        "pt" : "JOGAR AGORA"
     }
 }

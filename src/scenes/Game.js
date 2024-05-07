@@ -11,9 +11,9 @@ import reference from '../../assets/reference.png' // 1080x1920
 import single_grid from '../../assets/single_grid.png' // 111x111
 import complete_bg from '../../assets/complete_bg_empty.png'; // 1080x1920
 import play_now from '../../assets/play_now_button.png';
-
 import particle_atlas from '../../assets/particles-0.png';
 import particle_json from '../../assets/particles.json';
+import tutorial_bg from '../../assets/tutorial_bg.png';
 
 // Localization
 import localization_manager from '../localization/localization_manager';
@@ -78,6 +78,14 @@ const maxPlayTime = 60;
 let canClick = true;
 let isGameStarted = false;
 
+// Tutorial
+let isTutorialCompleted = false;
+let tutorialGrids = [];
+let tutorialWords = [];
+let tutorialBg;
+let handTweenChain;
+
+
 //#endregion
 
 export default class Game extends Phaser.Scene {
@@ -99,6 +107,7 @@ export default class Game extends Phaser.Scene {
         this.load.image('complete_bg', complete_bg);
         this.load.image('play_now', play_now);
         this.load.atlas('confettie', particle_atlas, particle_json);
+        this.load.image('tutorial_bg', tutorial_bg);
 
     }
     async create() {
@@ -108,6 +117,8 @@ export default class Game extends Phaser.Scene {
         this.createHeader();
         this.createGrids();
         this.createCompleteBg();
+        this.createHand();
+
         // Events
         this.input.on('pointerdown', this.handlePointerDown, this);
 
@@ -116,20 +127,117 @@ export default class Game extends Phaser.Scene {
         this.input.on('pointerover', this.handlePointerOver, this);
 
         this.input.on('pointerup', this.handlePointerUp, this);
+
+        this.showTutorial();
     }
     update() {}
 
     //#endregion
 
+    showTutorial() {
+
+        tutorialBg = this.add.graphics();
+        tutorialBg = this.add.image(540, 960, 'tutorial_bg');
+        tutorialBg.setAlpha(0.5);
+        tutorialBg.setDepth(20);
+        tutorialBg.setOrigin(0.5, 0.5);
+
+        gridslist.forEach(element => {
+            element.setInteractive(false);
+            element.disableInteractive();
+
+        });
+
+        for (let index = 2; index < 7; index++) {
+            var gridElement = gridslist[index];
+            var charElement = charTextsList[index];
+            tutorialGrids.push(gridElement);
+            tutorialWords.push(charElement);
+
+            gridElement.setDepth(21);
+            charElement.setDepth(22);
+
+            gridElement.setInteractive(true);
+        }
+
+        handImage.setDepth(22);
+
+        var firstGrid = tutorialGrids[0];
+        var lastGrid = tutorialGrids[4];
+        handImage.x = firstGrid.x;
+        handImage.y = firstGrid.y;
+        handImage.setScale(.8, .8);
+
+        handTweenChain = this.tweens.chain({
+            targets: handImage,
+            tweens: [{
+                    scaleX: .85,
+                    scaleY: .85,
+                    duration: 150,
+                    ease: 'Linear',
+                },
+                {
+                    x: lastGrid.x,
+                    y: lastGrid.y,
+                    duration: 750,
+                    ease: 'Linear',
+                },
+                {
+
+                    alpha: 0,
+                    duration: 150,
+                    ease: 'Linear',
+                },
+                {
+                    scaleX: 1,
+                    scaleY: 1,
+                    x: firstGrid.x,
+                    y: firstGrid.y,
+                    duration: 0,
+                },
+                {
+                    alpha: 1,
+                    duration: 150,
+                }
+            ],
+            loop: -1,
+            loopDelay: 250
+        });
+    }
+
+    completeTutorial() {
+        //handImage.destroy();
+        handTweenChain.stop();
+        isTutorialCompleted = true;
+
+        gridslist.forEach(element => {
+            element.setInteractive();
+            element.setDepth(1);
+        });
+
+        tutorialWords.forEach(element => {
+            element.setDepth(5);
+        });
+
+        this.tweens.add({
+            targets: [tutorialBg, handImage],
+            alpha: 0,
+            duration: 500,
+            ease: 'Linear'
+        });
+
+        isGameStarted = true;
+        this.countDownTimer();
+    }
     //#region Input Funcs
 
     handlePointerDown(event, gameObjects) {
         if (!canClick) return;
 
-        if (!isGameStarted) {
-            isGameStarted = true;
-            this.countDownTimer();
-        }
+        // if (!isGameStarted && isTutorialCompleted) {
+        //     isGameStarted = true;
+        //     this.countDownTimer();
+        // }
 
         console.log('Pointer down')
 
@@ -143,7 +251,10 @@ export default class Game extends Phaser.Scene {
         isMouseClicked = true;
 
     }
-    handlePointerMove(pointer) {}
+    handlePointerMove(pointer) {
+        // handImage.x = pointer.x;
+        // handImage.y = pointer.y;
+    }
 
     handlePointerOver(event, gameObjects) {
         // Eğer tıklanan nesne bir grid ise ve harf verisi varsa
@@ -194,7 +305,7 @@ export default class Game extends Phaser.Scene {
         headerImage.depth = 1;
 
         this.add.text(540, 250, headerText, {
-            fontSize: 60,
+            fontSize: 45,
             color: '#000000',
             align: 'center'
         }).setDepth(2).setOrigin(0.5, 0.5);
@@ -214,7 +325,7 @@ export default class Game extends Phaser.Scene {
         playNowButton.depth = -2;
 
         playNowTxt = this.add.text(540, 1235, playNowTxtString, {
-            font: 'bold 55px Arial',
+            font: 'bold 45px Arial',
             fill: '#5E5E5E',
             align: 'center'
         });
@@ -239,7 +350,7 @@ export default class Game extends Phaser.Scene {
     createHand() {
         handImage = this.add.image(0, 0, 'hand');
         handImage.setOrigin(0, 0);
-        handImage.depth = 2;
+        handImage.depth = 6;
     }
 
     createWordPanel() {
@@ -349,13 +460,13 @@ export default class Game extends Phaser.Scene {
     onGridSelected(grid) {
 
         hoveredGrids.push(grid);
-        grid.setDepth(2);
+        //grid.setDepth(2);
         grid.setTint(yellowTint);
         this.selectGridTween(grid);
     }
 
     onGridUnselected(grid) {
-        grid.setDepth(2);
+
         this.unmatchedGridTween(grid);
     }
     //#endregion
@@ -376,7 +487,6 @@ export default class Game extends Phaser.Scene {
         if (wordsList.includes(word)) {
 
             console.log('Matched');
-
             var averageX = 0;
             var averageY = 0;
             var count = 0;
@@ -403,6 +513,9 @@ export default class Game extends Phaser.Scene {
             averageY /= count;
             this.createFloatingText(averageX, averageY, word);
 
+            if (!isTutorialCompleted) {
+                this.completeTutorial();
+            }
             this.checkForComplete(word);
 
         } else {
