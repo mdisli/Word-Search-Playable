@@ -30,11 +30,13 @@ let handImage;
 let backgroundImage;
 let wordPanelImage;
 let headerImage;
+let headerText;
 
 // Words
 let wordPanelWordImageList = [];
+let wordPanelWordsList = [];
 
-const headerText = localizationManager.getWord('headerTxt');
+const headerString = localizationManager.getWord('headerTxt');
 const wordsList = localizationManager.getWord('wordList');
 const charLists = localizationManager.getWord('charList');
 
@@ -57,6 +59,7 @@ const greenColor = '#00FF00';
 const redColor = '#FF0000';
 const yellowColor = '#FFFF00';
 const whiteColor = '#FFFFFF';
+const blackColor = '#000000';
 
 const whiteTint = 0xFFFFFF;
 const greenTint = 0x00FF00;
@@ -138,9 +141,17 @@ export default class Game extends Phaser.Scene {
 
         tutorialBg = this.add.graphics();
         tutorialBg = this.add.image(540, 960, 'tutorial_bg');
+
+        headerImage.setDepth(21);
+        headerText.setDepth(22);
+
         tutorialBg.setAlpha(0.5);
         tutorialBg.setDepth(20);
         tutorialBg.setOrigin(0.5, 0.5);
+
+        var word = wordPanelWordsList[0];
+        word.setColor(whiteColor);
+        word.setDepth(22);
 
         gridslist.forEach(element => {
             element.setInteractive(false);
@@ -207,6 +218,15 @@ export default class Game extends Phaser.Scene {
 
     completeTutorial() {
         //handImage.destroy();
+
+        var word = wordPanelWordsList[0];
+        word.setColor(blackColor);
+        word.setDepth(2);
+
+        headerImage.setDepth(1);
+        headerText.setDepth(2);
+
+
         handTweenChain.stop();
         isTutorialCompleted = true;
 
@@ -304,7 +324,7 @@ export default class Game extends Phaser.Scene {
         headerImage.setOrigin(0.5, 0.5);
         headerImage.depth = 1;
 
-        this.add.text(540, 250, headerText, {
+        headerText = this.add.text(540, 250, headerString, {
             fontSize: 45,
             color: '#000000',
             align: 'center'
@@ -369,14 +389,17 @@ export default class Game extends Phaser.Scene {
 
             var word = wordsList[index];
             var image = this.add.image(startX, startY + (incrementY * index), 'green_rectangle');
-            this.add.text(startX, startY + (incrementY * index), word, {
-                    fontSize: 45,
-                    color: '#000000',
-                    align: 'center'
-                })
-                .setDepth(2)
-                .setOrigin(0.5, 0.5)
+            var txt = this.add.text(startX, startY + (incrementY * index), word, {
+                fontSize: 45,
+                color: '#000000',
+                align: 'center'
+            });
 
+            
+            txt.setOrigin(0.5, 0.5);
+            txt.setDepth(2);
+
+            wordPanelWordsList.push(txt);
             image
                 .setDataEnabled(true)
                 .setData('word', word);

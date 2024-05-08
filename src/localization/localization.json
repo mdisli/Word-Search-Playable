@@ -6,7 +6,7 @@
 
     "wordList" : {
         "en" : ["PLANE", "ACADEMY", "CABIN", "APPLE", "DAMAGE", "DOOR", "LADY", "DOCTOR", "CAN", "ACE", "FOX", "ARM", "CAMPUS", "BOX", "BUTTON", "LAUGH", "HORSE", "IRONY"],
-        "pt" : ["MASSA", "POLÍCIA", "METRO", "CARRO", "QUEIJO", "MESA", "GATO", "COMIDA", "OLÁ", "UVA", "SOL", "BOM", "MINUTO", "RUA", "AMANHÃ", "BANCO", "VERDE", "RÁDIO"]
+        "pt" : ["METRO","MASSA", "POLÍCIA", "CARRO", "QUEIJO", "MESA", "GATO", "COMIDA", "OLÁ", "UVA", "SOL", "BOM", "MINUTO", "RUA", "AMANHÃ", "BANCO", "VERDE", "RÁDIO"]
 
     },
 
